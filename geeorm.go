@@ -1,12 +1,14 @@
 package GeeORM
 
 import (
+	"GeeORM/dialect"
 	"GeeORM/log"
 	"GeeORM/session"
 	"database/sql"
 )
 
 type Engine struct {
+	d  dialect.Dialect
 	db *sql.DB
 }
 
@@ -22,13 +24,15 @@ func NewEngine(driverName string, dataSourceName string) (*Engine, error) {
 		return nil, err
 	}
 	log.Info("Success connect to database")
+	dialect.Init()
 	return &Engine{
 		db: db,
+		d:  dialect.GetDialect(driverName),
 	}, nil
 }
 
 func (e *Engine) NewSession() *session.Session {
-	return session.New(e.db)
+	return session.New(e.db, e.d)
 }
 
 func (e *Engine) Close() error {

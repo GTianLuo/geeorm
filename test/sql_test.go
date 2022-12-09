@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-type User struct {
-	Id       int32
+type User2 struct {
+	Id       int32 `geeorm:"primary key AUTO_INCREMENT"`
 	Username string
 	Password string
 	Gender   rune
@@ -23,4 +23,7 @@ func Test(t *testing.T) {
 	rows := session.Raw("select *from t_user where id = ?", 3).QueryRow()
 	rows.Scan(&id, &username, &password, &gender, &email)
 	fmt.Println(id, username, password, gender, email)
+	//session.Model(&User2{}).CreateTable()
+	session.Model(&User2{}).DropTable()
+	fmt.Println(session.Model(&User2{}).HasTable())
 }
