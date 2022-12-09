@@ -32,10 +32,10 @@ func (s *Session) Clear() {
 
 func (s *Session) Exec() (result sql.Result, err error) {
 	defer s.Clear()
+	log.Info(s.sql.String(), s.sqlVars)
 	if result, err = s.db.Exec(s.sql.String(), s.sqlVars...); err != nil {
 		log.Error(err.Error())
 	}
-	log.Info(s.sql.String(), s.sqlVars)
 	return
 }
 
@@ -85,19 +85,22 @@ func (s *Session) CreateTable() error {
 		columns = append(columns, fmt.Sprintf("%s %s %s ", field.Name, field.Type, field.Tag))
 	}
 	args := strings.Join(columns, ",\n")
-	_, err := s.Raw("Create table %s(%s) ", table.Name, args).Exec()
+	_, err := s.Raw(fmt.Sprintf("Create table %s(%s) ", table.Name, args)).Exec()
 	return err
 }
 
 func (s *Session) DropTable() error {
 	table := s.ReflTable()
-	_, err := s.Raw("drop table %s if exists", table.Name).Exec()
+	_, err := s.Raw(fmt.Sprintf("drop table if exists %s", table.Name)).Exec()
 	return err
 }
 
 func (s *Session) HasTable() bool {
-	result, _ := s.Raw(s.dialect.TableExistSQL(s.ReflTable().Name)).Exec()
-	if result != nil {
+	sql, args := s.dialect.TableExistSQL(s.ReflTable().Name)
+	row := s.Raw(fmt.Sprintf(sql, args...)).QueryRow()
+	table := ""
+	row.Scan(&table)
+	if table != "" {
 		return true
 	}
 	return false
