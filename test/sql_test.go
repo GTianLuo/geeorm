@@ -26,4 +26,5 @@ func Test(t *testing.T) {
 	//session.Model(&User2{}).CreateTable()
 	session.Model(&User2{}).DropTable()
 	fmt.Println(session.Model(&User2{}).HasTable())
+
 }

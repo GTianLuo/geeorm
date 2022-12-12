@@ -1,6 +1,7 @@
 package session
 
 import (
+	"GeeORM/clause"
 	"GeeORM/dialect"
 	"GeeORM/log"
 	"GeeORM/schema"
@@ -14,6 +15,7 @@ type Session struct {
 	db        *sql.DB
 	dialect   dialect.Dialect
 	reflTable *schema.Schema
+	clause    clause.Clause
 	sql       strings.Builder
 	sqlVars   []interface{}
 }
@@ -22,6 +24,7 @@ func New(db *sql.DB, d dialect.Dialect) *Session {
 	return &Session{
 		db:      db,
 		dialect: d,
+		clause:  clause.Clause{},
 	}
 }
 
@@ -76,7 +79,6 @@ func (s *Session) ReflTable() *schema.Schema {
 	}
 	return s.reflTable
 }
-
 func (s *Session) CreateTable() error {
 	table := s.ReflTable()
 	var columns []string

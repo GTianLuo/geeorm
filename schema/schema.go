@@ -55,3 +55,13 @@ func ParseToSchema(d dialect.Dialect, value interface{}) *Schema {
 	}
 	return s
 }
+
+// RecordValues 例User{name :"Jok",Id:1}  return ["Jok",1]
+func (s *Schema) RecordValues(value interface{}) []interface{} {
+	srcValue := reflect.Indirect(reflect.ValueOf(value))
+	var destValue []interface{}
+	for _, fieldName := range s.FieldName {
+		destValue = append(destValue, srcValue.FieldByName(fieldName).Interface())
+	}
+	return destValue
+}
