@@ -97,6 +97,13 @@ func (s *Session) DropTable() error {
 	return err
 }
 
+func (s *Session) Count() (count int64, err error) {
+	s.clause.Set(clause.COUNT, s.ReflTable().Name)
+	sql, vars := s.clause.Build(clause.COUNT, clause.WHERE)
+	err = s.Raw(sql, vars...).QueryRow().Scan(&count)
+	return
+}
+
 func (s *Session) HasTable() bool {
 	sql, args := s.dialect.TableExistSQL(s.ReflTable().Name)
 	row := s.Raw(fmt.Sprintf(sql, args...)).QueryRow()

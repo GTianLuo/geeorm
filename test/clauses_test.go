@@ -40,3 +40,36 @@ func TestInsert(t *testing.T) {
 	fmt.Println("vars:", i)
 
 }
+
+func TestDelete(t *testing.T) {
+	var c clause.Clause
+	c.Set(clause.DELETE, "User")
+	c.Set(clause.WHERE, "Sex = ?", '男')
+	sql, vars := c.Build(clause.DELETE, clause.WHERE)
+	fmt.Println("sql:" + sql)
+	fmt.Println("vars:", vars)
+}
+
+func TestUpdate(t *testing.T) {
+	var c clause.Clause
+	m := make(map[string]interface{})
+	m["Name"] = "张三"
+	m["Id"] = 213312
+	c.Set(clause.UPDATE, "User", m)
+	c.Set(clause.WHERE, "Sex = ?", '男')
+	sql, vars := c.Build(clause.UPDATE, clause.WHERE)
+	fmt.Println("sql:" + sql)
+	fmt.Println("vars:", vars)
+}
+
+func TestComb(t *testing.T) {
+	engine, _ := GeeORM.NewEngine("mysql", "root:111111@tcp(localhost:3306)/study2")
+	session := engine.NewSession()
+	count, _ := session.Model(&User2{}).Where("Id = ?", 1).Count()
+	count, _ = session.Model(&User2{}).Where("Id = ?", 1).Update("User2", "Username", "张思")
+	fmt.Println(count)
+	session.Model(&User2{}).Where("Id = ?", 2).Delete()
+	user := User2{}
+	session.First(&user)
+	fmt.Println(user)
+}

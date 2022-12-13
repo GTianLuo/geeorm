@@ -10,8 +10,10 @@ const (
 	SELECT
 	LIMIT
 	DELETE
+	UPDATE
 	WHERE
 	ORDERBY
+	COUNT
 )
 
 type Clause struct {
@@ -29,7 +31,13 @@ func (c *Clause) Set(t Type, values ...interface{}) {
 	c.sqlVars[t] = append(make([]interface{}, 0), sqlVars...)
 }
 
+func (c *Clause) Clear() {
+	c.sql = nil
+	c.sqlVars = nil
+}
+
 func (c *Clause) Build(orders ...Type) (string, []interface{}) {
+	defer c.Clear()
 	var clauses []string
 	var vars []interface{}
 	for _, order := range orders {

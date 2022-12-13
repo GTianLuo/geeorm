@@ -16,7 +16,10 @@ func init() {
 	generators[LIMIT] = _limit
 	generators[SELECT] = _select
 	generators[WHERE] = _where
-	generators[ORDERBY] = _OrderBy
+	generators[ORDERBY] = _orderBy
+	generators[DELETE] = _delete
+	generators[UPDATE] = _update
+	generators[COUNT] = _count
 }
 
 func _insert(values ...interface{}) (string, []interface{}) {
@@ -66,10 +69,34 @@ func _limit(values ...interface{}) (string, []interface{}) {
 
 func _where(values ...interface{}) (string, []interface{}) {
 	//WHERE $condition
-	return fmt.Sprintf("WHERE %s", values[0]), values[1:]
+	return fmt.Sprintf("WHERE %s", values[0]), values[1].([]interface{})
 }
 
-func _OrderBy(values ...interface{}) (string, []interface{}) {
+func _orderBy(values ...interface{}) (string, []interface{}) {
 	//ORDER BY $condition
 	return fmt.Sprintf("ORDER BY %s", values[0]), []interface{}{}
+}
+
+func _update(values ...interface{}) (string, []interface{}) {
+	//UPDATE $TableName Set $field1 = ?,$field = ?
+	tableName := values[0].(string)
+	m := values[1].(map[string]interface{})
+	var keys []string
+	var vars []interface{}
+	for k, v := range m {
+		keys = append(keys, k+"=?")
+		vars = append(vars, v)
+	}
+	return fmt.Sprintf("UPDATE %s SET %s", tableName, strings.Join(keys, ",")), vars
+}
+
+func _delete(values ...interface{}) (string, []interface{}) {
+	//UPDATE FORM $TableName
+	return fmt.Sprintf("DELETE FROM %s", values[0].(string)), []interface{}{}
+}
+
+func _count(values ...interface{}) (string, []interface{}) {
+	//SELECT COUNT(*) FORM $TableName
+	tableName := values[0].(string)
+	return _select([]string{"COUNT(*)"}, tableName)
 }
