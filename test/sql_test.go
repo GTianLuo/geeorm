@@ -2,6 +2,7 @@ package test
 
 import (
 	"GeeORM"
+	"GeeORM/session"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"testing"
@@ -27,4 +28,24 @@ func Test(t *testing.T) {
 	session.Model(&User2{}).DropTable()
 	fmt.Println(session.Model(&User2{}).HasTable())
 
+}
+
+func (u *User2) BeforeQuery(s *session.Session) error {
+	fmt.Println("开始查找！")
+	return nil
+}
+
+func (u *User2) AfterQuery(s *session.Session) error {
+	u.Password = "********"
+	return nil
+}
+
+func TestHook(t *testing.T) {
+	engine, _ := GeeORM.NewEngine("mysql", "root:111111@tcp(localhost:3306)/study2")
+	session := engine.NewSession()
+	var users []User2
+	session.Find(&users)
+	for _, i := range users {
+		fmt.Println(i)
+	}
 }

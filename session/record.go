@@ -3,18 +3,16 @@ package session
 import (
 	"GeeORM/clause"
 	"GeeORM/log"
-	"fmt"
 	"reflect"
 )
 
 func (s *Session) Find(values interface{}) error {
 	destSlice := reflect.Indirect(reflect.ValueOf(values))
 	destType := destSlice.Type().Elem()
-	fmt.Println(destType)
-	table := s.Model(reflect.New(destType).Elem().Interface()).ReflTable()
-
+	table := s.Model(reflect.New(destType).Interface()).ReflTable()
 	s.clause.Set(clause.SELECT, table.FieldName, table.Name)
 	sql, vars := s.clause.Build(clause.SELECT, clause.WHERE, clause.ORDERBY, clause.LIMIT)
+	s.CallMethod(BeforeQuery, nil)
 	rows, err := s.Raw(sql, vars...).QueryRows()
 	if err != nil {
 		return err
@@ -29,6 +27,7 @@ func (s *Session) Find(values interface{}) error {
 		if err := rows.Scan(fieldsAddr...); err != nil {
 			return err
 		}
+		s.CallMethod(AfterQuery, dest.Addr().Interface())
 		destSlice.Set(reflect.Append(destSlice, dest))
 	}
 	return nil
