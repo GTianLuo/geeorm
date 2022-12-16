@@ -13,11 +13,18 @@ import (
 
 type Session struct {
 	db        *sql.DB
+	tx        *sql.Tx
 	dialect   dialect.Dialect
 	reflTable *schema.Schema
 	clause    clause.Clause
 	sql       strings.Builder
 	sqlVars   []interface{}
+}
+
+type CommonDB interface {
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+	Exec(query string, args ...interface{}) (sql.Result, error)
 }
 
 func New(db *sql.DB, d dialect.Dialect) *Session {
@@ -28,6 +35,16 @@ func New(db *sql.DB, d dialect.Dialect) *Session {
 	}
 }
 
+var _ CommonDB = (*sql.DB)(nil)
+var _ CommonDB = (*sql.Tx)(nil)
+
+func (s *Session) DB() CommonDB {
+	if s.tx != nil {
+		return s.tx
+	}
+	return s.db
+}
+
 func (s *Session) Clear() {
 	s.sql.Reset()
 	s.sqlVars = nil
@@ -36,7 +53,7 @@ func (s *Session) Clear() {
 func (s *Session) Exec() (result sql.Result, err error) {
 	defer s.Clear()
 	log.Info(s.sql.String(), s.sqlVars)
-	if result, err = s.db.Exec(s.sql.String(), s.sqlVars...); err != nil {
+	if result, err = s.DB().Exec(s.sql.String(), s.sqlVars...); err != nil {
 		log.Error(err.Error())
 	}
 	return
@@ -52,14 +69,14 @@ func (s *Session) Raw(sql string, sqlVars ...interface{}) *Session {
 func (s *Session) QueryRow() (row *sql.Row) {
 	defer s.Clear()
 	log.Info(s.sql.String(), s.sqlVars)
-	row = s.db.QueryRow(s.sql.String(), s.sqlVars...)
+	row = s.DB().QueryRow(s.sql.String(), s.sqlVars...)
 	return
 }
 
 func (s *Session) QueryRows() (rows *sql.Rows, err error) {
 	defer s.Clear()
 	log.Info(s.sql.String(), s.sqlVars)
-	if rows, err = s.db.Query(s.sql.String(), s.sqlVars...); err != nil {
+	if rows, err = s.DB().Query(s.sql.String(), s.sqlVars...); err != nil {
 		log.Error(err)
 	}
 	return
