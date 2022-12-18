@@ -30,7 +30,7 @@ func (s *Session) Find(values interface{}) error {
 		s.CallMethod(AfterQuery, dest.Addr().Interface())
 		destSlice.Set(reflect.Append(destSlice, dest))
 	}
-	return nil
+	return rows.Close()
 }
 
 func (s *Session) Insert(values ...interface{}) (int64, error) {

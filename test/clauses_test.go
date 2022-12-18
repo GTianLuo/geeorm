@@ -22,10 +22,11 @@ func TestSelect(t *testing.T) {
 
 	session.Model(&User2{}).DropTable()
 	session.Model(&User2{}).CreateTable()
-	session.Insert(
-		&User2{Id: 1, Username: "张三", Password: "122332", Gender: '男', Email: "2985496686@qq.com"},
-		&User2{Id: 2, Username: "李四", Password: "422332", Gender: '女', Email: "4343496686@qq.com"},
-		&User2{Id: 3, Username: "萌妹", Password: "522332", Gender: '女', Email: "6743496686@qq.com"})
+	/*
+		session.Insert(
+			&User2{Id: 1, Username: "张三", Password: "122332", Gender: '男', Email: "2985496686@qq.com"},
+			&User2{Id: 2, Username: "李四", Password: "422332", Gender: '女', Email: "4343496686@qq.com"},
+			&User2{Id: 3, Username: "萌妹", Password: "522332", Gender: '女', Email: "6743496686@qq.com"})*/
 	var users []User2
 	session.Find(&users)
 	fmt.Println(users)

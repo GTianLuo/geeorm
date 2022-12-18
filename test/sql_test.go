@@ -13,7 +13,8 @@ type User2 struct {
 	Username string
 	Password string
 	Gender   rune
-	Email    string
+	Weight   int32
+	Height   int32
 }
 
 func Test(t *testing.T) {
